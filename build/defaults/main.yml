@@ -1,0 +1,6 @@
+---
+# defaults file for build
+dest_folder: /etc/boxfuse
+repo_url: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+dest_tomcat: /var/lib/tomcat9/webapps/
+ip_adres: #must be filled 

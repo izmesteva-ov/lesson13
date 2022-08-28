@@ -1,0 +1,20 @@
+---
+# tasks file for build
+- name: Install many packages
+  apt: name={{ item }} state=present
+  with_items:
+    - default-jdk
+    - maven
+    - git
+- name: Git Clone app
+  git:
+    repo: {{ repo_url }}
+    dest: {{ dest_folder }}
+- name: Build app
+  command: mvn clean package chdir={{ dest_folder }}
+- name: Copy file .war
+  synchronize:
+    src: {{ dest_folder }}/target/hello-1.0.war
+    dest: {{ dest_tomcat }}
+    mode: pull
+  delegate_to: {{ ip_adres }}

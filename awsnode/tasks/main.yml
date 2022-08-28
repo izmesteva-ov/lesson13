@@ -1,0 +1,74 @@
+---
+# tasks file for awsnode
+- name: Create an EC2 Security Group
+  ec2_group:
+    name: '{{ security_group }}'
+    description: Security Group allowing port 22
+    region: '{{ aws_region }}'
+    aws_access_key: '{{ access_key }}'
+    aws_secret_key: '{{ secret_key }}'
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0    
+    
+- name: Create an EC2 key pair
+  ec2_key:
+    name: '{{ key_name }}'
+    region: '{{ aws_region }}'
+  register: ec2_key
+- name: Save private key
+  copy: 
+    content='{{ ec2_key.key.private_key }}' 
+    dest='~/.ssh/aws-key.pem' 
+    mode=0600
+  
+- name: EC2 instance for build
+  ec2:
+     key_name: '{{ key_name }}'
+     region: '{{ aws_region }}'
+     instance_type: '{{ instance_type }}'
+     image: '{{ image_ami_id }}'
+     wait: true
+     group: '{{ security_group }}'
+     count: 1
+     vpc_subnet_id: '{{ vpc_subnet_id }}'
+     assign_public_ip: 'yes'     
+     state: present
+     aws_access_key: '{{ access_key }}'
+     aws_secret_key: '{{ secret_key }}'
+     instance_tags:
+        Name: build
+  register: ec2 
+- name: Add build instance to host group
+  add_host:
+    hostname: '{{ item.public_ip }}'
+    groupname: build
+  loop: '{{ ec2.instances }}'
+  delegate_to: localhost
+  
+  
+- name: EC2 instance for prod  
+  ec2:
+     key_name: '{{ key_name }}'
+     region: '{{ aws_region }}'
+     instance_type: '{{ instance_type }}'
+     image: '{{ image_ami_id }}'
+     wait: true
+     group: '{{ security_group }}'
+     count: 1
+     vpc_subnet_id: '{{ vpc_subnet_id }}'
+     assign_public_ip: 'yes'     
+     state: present
+     aws_access_key: '{{ access_key }}'
+     aws_secret_key: '{{ secret_key }}'
+     instance_tags:
+        Name: prod
+  register: ec2
+- name: dd prod instance to host group
+  add_host:
+    hostname: '{{ item.public_ip }}'
+    groupname: prod
+  loop: '{{ ec2.instances }}'
+  delegate_to: localhost

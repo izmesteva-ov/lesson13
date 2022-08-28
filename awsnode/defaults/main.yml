@@ -1,0 +1,10 @@
+---
+# defaults file for awsnode
+security_group: EC2SecurityCroupMy
+key_name: aws_my_key
+aws_region: #must be filled
+image_ami_id: #must be filled
+instance_type: t2.micro
+vpc_subnet_id: #must be filled
+aws_access_key: #must be filled
+aws_access_secret: #must be filled
