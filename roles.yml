@@ -1,0 +1,18 @@
+---
+- name: awsnode
+  hosts: localhost
+  become: 'yes'
+  roles:
+    - awsnode
+
+- name: build
+  hosts: build
+  become: 'yes'
+  roles:
+    - build
+
+- name: deploy
+  hosts: prod
+  become: 'yes'
+  roles:
+    - deploy
